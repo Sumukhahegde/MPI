@@ -11,6 +11,9 @@ main (int argc, char* argv[]){
 	int tag = 0;
 	char message[100];
 	MPI_Status status;
+	long long int i;
+	long long int sum;
+	
 
 
 	MPI_Init(&argc, &argv);
@@ -19,9 +22,20 @@ main (int argc, char* argv[]){
 
 	MPI_Comm_size(MPI_COMM_WORLD, &p);
 
-/*
+	for(i=0;i<10000000000;i++){
+		sum = sum + i;
+	}
+
+	char processor_name[MPI_MAX_PROCESSOR_NAME];
+    	int name_len;
+
+	MPI_Get_processor_name(processor_name, &name_len);
+
+	printf("Sum in processor %s is %lld\n", processor_name, sum);
+
+
 	if(my_rank!=0){
-		sprintf(message, "Greetings from process %d!", my_rank);
+		sprintf(message, "Greetings from process %d!", my_rank);		
 
 		dest = 0;
 
@@ -32,9 +46,11 @@ main (int argc, char* argv[]){
 			MPI_Recv(message, 100, MPI_CHAR, source, tag, MPI_COMM_WORLD, &status);
 			printf("%s\n", message);
 		}
-	} */
+	} 
 
 	if(my_rank==0) printf("Number of processes are %d\n", p);
+
+	
 
 	MPI_Finalize();
 
