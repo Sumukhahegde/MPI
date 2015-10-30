@@ -2,6 +2,38 @@
 #include <math.h>
 #include "mpi.h"
 
+
+
+void Get_data(double *a_ptr, double *b_ptr, long long int *n_ptr, int my_rank, int p){
+
+	int source = 0;
+	int dest;
+	int tag;
+	MPI_Status status;	
+
+	if(my_rank == 0){
+		printf("Enter the starting point a, ending point b and the number of trapezoids:");
+		scanf("%lf %lf %lld",a_ptr, b_ptr, n_ptr);
+
+		for(dest = 1; dest<p; dest++){
+			tag = 0;
+			MPI_Send(a_ptr, 1, MPI_DOUBLE, dest, tag, MPI_COMM_WORLD);
+			tag = 1;
+			MPI_Send(b_ptr, 1, MPI_DOUBLE, dest, tag, MPI_COMM_WORLD);
+			tag = 2;
+			MPI_Send(n_ptr, 1, MPI_DOUBLE, dest, tag, MPI_COMM_WORLD);
+		}
+	} else{
+		tag = 0;
+		MPI_Recv(a_ptr, 1, MPI_DOUBLE, source, tag, MPI_COMM_WORLD, &status);
+		tag = 1;
+		MPI_Recv(b_ptr, 1, MPI_DOUBLE, source, tag, MPI_COMM_WORLD, &status);
+		tag = 2;
+		MPI_Recv(n_ptr, 1, MPI_DOUBLE, source, tag, MPI_COMM_WORLD, &status);
+	}
+
+}
+
 double f(double x){
 	
 	double height;
@@ -34,9 +66,9 @@ main(int argc, char** argv){
 
 	int p;
 	int my_rank;
-	double a = -2.0;
-	double b = 2.0;
-	long long int n = pow(2, 30);
+	double a;
+	double b;
+	long long int n;
 	double h;	//base lenght of each trapezoid
 	double local_a;
 	double local_b;
@@ -47,14 +79,16 @@ main(int argc, char** argv){
 	int dest = 0;
 	int tag = 0;
 	MPI_Status status;
-
-//	double Trap(double local_a, double local_b, double local_n, double h);
-
+	
 	MPI_Init(&argc, &argv);
 
 	MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
 
 	MPI_Comm_size(MPI_COMM_WORLD, &p);
+
+
+	Get_data(&a, &b, &n, my_rank, p); 
+
 
 	h = ( b - a ) / n;
 
