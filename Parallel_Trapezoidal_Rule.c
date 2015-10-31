@@ -116,17 +116,8 @@ main(int argc, char** argv){
 
 	integral = Trap(local_a, local_b, local_n, h);
 
-
-	if(my_rank==0){
-		total = integral;
-
-		for(source = 1;source<p;source++){
-			MPI_Recv(&integral, 1, MPI_DOUBLE, source, tag, MPI_COMM_WORLD, &status);
-			total += integral;
-		}
-	} else{
-		MPI_Send(&integral, 1, MPI_DOUBLE, dest, tag, MPI_COMM_WORLD);
-	}
+	MPI_Reduce(&integral, &total, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
+	
 
 	if(my_rank == 0){
 		printf("With %lld trapezoids, our estimate of the integral from %lf to %lf = %lf\n", n, a, b, total);
